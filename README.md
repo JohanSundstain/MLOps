@@ -180,6 +180,22 @@ Sentinel-2.
 
 ---
 
+## Документация
+
+Подробное описание проекта, глубже чем этот README:
+
+| Документ                                       | О чём                                                            |
+| ---------------------------------------------- | ---------------------------------------------------------------- |
+| [`docs/README.md`](docs/README.md)             | обзор, возможности, быстрый старт, глоссарий                     |
+| [`docs/architecture.md`](docs/architecture.md) | устройство кода, слои, поток данных, конфиги, артефакты          |
+| [`docs/data.md`](docs/data.md)                 | данные: Sentinel-2, STAC, WorldCover, нарезка, сплит, DVC        |
+| [`docs/training.md`](docs/training.md)         | модель, лоссы, оптимизация, метрики, порог, MLflow               |
+| [`docs/inference.md`](docs/inference.md)       | инференс, площади, ΔS, ONNX/TensorRT, серверы                    |
+| [`docs/deployment.md`](docs/deployment.md)     | развёртывание локально/Colab/продакшен, чек-листы, разбор ошибок |
+| [`docs/tools.md`](docs/tools.md)               | подробно про каждый инструмент и его подводные камни             |
+
+---
+
 ## Структура репозитория
 
 ```
@@ -212,6 +228,7 @@ src/lake_segmentation/
 └── baseline/                NDWI-бейзлайн
 scripts/                     shell-обёртки (TensorRT, загрузка данных)
 tests/                       unit-тесты (pytest)
+docs/                        подробная документация (архитектура, данные, обучение, деплой, инструменты)
 notebooks/colab_train.ipynb  обучение в Google Colab
 dvc.yaml                     стадии DVC (download, preprocess, train)
 ```
