@@ -2,6 +2,8 @@
 repository_dir: triton_repo
 model_name: lake_unet
 onnx_model: weights/lake_unet.onnx
+# Model bundle produced by training (threshold, tile size, band order).
+bundle: weights/bundle.json
 max_batch_size: 8
 input_name: image
 output_name: probabilities

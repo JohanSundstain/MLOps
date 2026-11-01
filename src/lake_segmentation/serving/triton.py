@@ -56,7 +56,7 @@ dynamic_batching {{
 def prepare_repository(cfg: DictConfig) -> Path:
     """Create ``<repository>/<model_name>/1/model.onnx`` and the ``config.pbtxt``."""
 
-    serving_cfg = cfg.serving
+    serving_cfg = cfg.triton
     model_name = str(serving_cfg.model_name)
     repository = Path(serving_cfg.repository_dir)
     version_dir = repository / model_name / "1"
@@ -69,7 +69,7 @@ def prepare_repository(cfg: DictConfig) -> Path:
         )
     shutil.copy2(onnx_path, version_dir / "model.onnx")
 
-    bundle = load_bundle(Path(cfg.infer.bundle))
+    bundle = load_bundle(Path(cfg.triton.get("bundle") or cfg.infer.bundle))
     tile_size = int(bundle["postprocessing"]["tile_size"])
     band_count = len(bundle["preprocessing"]["band_order"])
     config_text = CONFIG_TEMPLATE.format(
@@ -100,17 +100,21 @@ def prepare_repository(cfg: DictConfig) -> Path:
 def client_snippet(cfg: DictConfig) -> str:
     """Return a copy-pasteable Triton client example."""
 
-    serving_cfg = cfg.serving
+    serving_cfg = cfg.triton
+    bundle = load_bundle(Path(serving_cfg.get("bundle") or cfg.infer.bundle))
+    tile_size = int(bundle["postprocessing"]["tile_size"])
+    band_count = len(bundle["preprocessing"]["band_order"])
+    threshold = float(bundle["postprocessing"]["threshold"])
     url = f"{serving_cfg.host}:{serving_cfg.port}"
     return f"""\
 import numpy as np
 import tritonclient.http as httpclient
 
 client = httpclient.InferenceServerClient(url="{url}")
-image = np.random.rand(1, 4, 256, 256).astype(np.float32)
+image = np.random.rand(1, {band_count}, {tile_size}, {tile_size}).astype(np.float32)
 inp = httpclient.InferInput("{serving_cfg.input_name}", image.shape, "FP32")
 inp.set_data_from_numpy(image)
 result = client.infer("{serving_cfg.model_name}", inputs=[inp])
-probabilities = result.as_numpy("{serving_cfg.output_name}")  # (1, 1, 256, 256)
-mask = probabilities[0, 0] > 0.5
+probabilities = result.as_numpy("{serving_cfg.output_name}")  # (1, 1, {tile_size}, {tile_size})
+mask = probabilities[0, 0] > {threshold}
 """

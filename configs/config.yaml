@@ -16,6 +16,7 @@ defaults:
   - export: onnx
   - tensorrt: default
   - serving: mlflow
+  - triton: default
   - mlflow: default
   - baseline: ndwi
   - _self_

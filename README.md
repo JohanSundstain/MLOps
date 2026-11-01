@@ -471,7 +471,9 @@ docker run --gpus all --rm -p 8000:8000 -p 8001:8001 -p 8002:8002 \
 ```
 
 Клиентский код печатает команда `prepare-triton`; модель отдаёт вероятности, порог берётся из
-`bundle.json`.
+`bundle.json`. Конфиги серверов разведены по группам Hydra: `configs/serving/mlflow.yaml`
+(`serving.*`) и `configs/triton/default.yaml` (`triton.*`), поэтому оба варианта описаны в одном
+конфиге без переключения групп.
 
 ## Dependencies
 
