@@ -7,7 +7,7 @@ name = "lake-segmentation"
 version = "0.1.0"
 description = "Water segmentation of lakes on Sentinel-2 imagery and lake area change analysis"
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
   { name = "Matvey Kopylov" },
@@ -17,7 +17,9 @@ authors = [
 keywords = ["remote-sensing", "sentinel-2", "semantic-segmentation", "pytorch-lightning"]
 classifiers = [
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Image Processing",
 ]
 dependencies = [

@@ -223,7 +223,7 @@ dvc.yaml                     стадии DVC (download, preprocess, train)
 
 ## Setup
 
-Требования: Python 3.11–3.12, [uv](https://docs.astral.sh/uv/), git. GPU не обязателен для
+Требования: Python 3.11–3.13 (обучение проверялось на 3.12 и 3.13), [uv](https://docs.astral.sh/uv/), git. GPU не обязателен для
 инференса, но нужен для обучения (CPU-обучение поддерживается, но медленное).
 
 ```bash
