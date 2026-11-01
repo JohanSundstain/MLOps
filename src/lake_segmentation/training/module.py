@@ -180,7 +180,9 @@ class LakeSegmentationModule(LightningModule):
     def _build_scheduler(self, optimizer: Optimizer, base_learning_rate: float) -> dict[str, Any]:
         scheduler_cfg = self.hparams.get("scheduler") or {}
         name = str(scheduler_cfg.get("name", "cosine"))
-        epochs = int(self.trainer.max_epochs) if self.trainer is not None else 1
+        # ``self.trainer`` raises when the module is not attached yet; ``_trainer`` is None then.
+        trainer = getattr(self, "_trainer", None)
+        epochs = int(trainer.max_epochs) if trainer is not None else 1
         if name != "cosine":
             raise ValueError(f"Unknown scheduler {name!r}, only 'cosine' is implemented")
         lr_lambda = build_warmup_cosine_lambda(

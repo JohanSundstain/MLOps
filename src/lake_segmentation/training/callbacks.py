@@ -7,7 +7,11 @@ from typing import Any, Mapping
 
 import torch
 from lightning.pytorch import Callback, LightningModule, Trainer
-from lightning.pytorch.loggers import MLflowLogger
+
+try:  # Lightning >= 2.6 renamed the class to ``MLFlowLogger`` (capital F)
+    from lightning.pytorch.loggers import MLFlowLogger as MLflowLogger
+except ImportError:  # pragma: no cover - older Lightning releases
+    from lightning.pytorch.loggers import MLflowLogger  # type: ignore[assignment]
 
 from lake_segmentation.logging_utils import get_logger
 from lake_segmentation.plots import save_training_curves

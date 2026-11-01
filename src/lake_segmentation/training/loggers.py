@@ -13,7 +13,12 @@ from pathlib import Path
 from typing import Any, Mapping
 from urllib.parse import urlparse
 
-from lightning.pytorch.loggers import CSVLogger, MLflowLogger
+from lightning.pytorch.loggers import CSVLogger
+
+try:  # Lightning >= 2.6 renamed the class to ``MLFlowLogger`` (capital F)
+    from lightning.pytorch.loggers import MLFlowLogger as MLflowLogger
+except ImportError:  # pragma: no cover - older Lightning releases
+    from lightning.pytorch.loggers import MLflowLogger  # type: ignore[assignment]
 from omegaconf import DictConfig
 
 from lake_segmentation.logging_utils import get_logger
@@ -106,14 +111,12 @@ def log_run_metadata(logger: Any, cfg: DictConfig) -> None:
         logger.log_hyperparams(flat)
         if isinstance(logger, MLflowLogger):
             experiment = logger.experiment
-            experiment.set_tags(
-                logger.run_id,
-                {
-                    "git_commit": get_git_commit(),
-                    "git_dirty": str(get_git_dirty()),
-                    "project": str(cfg.project_name),
-                },
-            )
+            for key, value in {
+                "git_commit": get_git_commit(),
+                "git_dirty": str(get_git_dirty()),
+                "project": str(cfg.project_name),
+            }.items():
+                experiment.set_tag(logger.run_id, key, value)
             LOGGER.info("Logged run metadata to MLflow run %s", logger.run_id)
     except Exception as error:  # noqa: BLE001 - tracking must not break training
         LOGGER.warning("Could not log hyper-parameters: %s", error)
