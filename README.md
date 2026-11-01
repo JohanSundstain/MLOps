@@ -335,7 +335,7 @@ python commands.py train --overrides="train.accelerator=gpu,train.devices=1"
 ```
 weights/lake_unet.ckpt        state_dict + порог + git commit
 weights/bundle.json           «карточка модели»: архитектура, нормализация, порог, метрики
-weights/<checkpoint>.ckpt     чекпоинт Lightning по val/iou (save_top_k=1)
+weights/best-<epoch>.ckpt      чекпоинт Lightning по val/iou (save_top_k=1)
 plots/losses.png              train/val loss
 plots/metrics.png             IoU / Dice / Precision / Recall
 plots/area_error.png          Relative Area Error
@@ -425,7 +425,7 @@ python commands.py infer \
     --date-a 2023-07-15 --date-b 2024-07-20
 ```
 
-Результаты в `predictions/`:
+Результаты в `predictions/` (пример отчёта лежит в `plots/demo_area_change.png`):
 
 ```
 <patch>_mask.tif           бинарная маска воды (uint8, с геопривязкой)
@@ -548,15 +548,73 @@ dvc push                      # отправить данные и веса в �
 
 ## Результаты
 
-Заполняется после запуска обучения в Google Colab (ноутбук `notebooks/colab_train.ipynb`).
+Обучение выполнено в Google Colab (T4, 16 ГБ): 30 эпох по 441 патчу (train 309), batch 32,
+mixed precision, ~2,5 минуты; оценка пиковой памяти ≈ 3–4 ГБ VRAM. Порог бинаризации подобран на
+валидационной выборке (0,55), тестовая выборка (66 патчей, озёра Чаны и Шира) использовалась
+один раз для итоговой оценки.
 
-| Модель              | IoU | Dice | Precision | Recall | Relative Area Error, % |
-| ------------------- | --- | ---- | --------- | ------ | ---------------------- |
-| NDWI (порог по val) | —   | —    | —         | —      | —                      |
-| U-Net ResNet34      | —   | —    | —         | —      | —                      |
+### Сравнение с бейзлайном (тест, 66 патчей)
 
-Метрики по каждому озеру и графики обучения — в `plots/` и в MLflow-эксперименте
-`lake-water-segmentation`.
+| Метрика                         | NDWI, порог 0,00 | U-Net ResNet34, порог 0,55 | Ориентир |
+| ------------------------------- | ---------------- | -------------------------- | -------- |
+| IoU (micro)                     | **0,9688**       | 0,9627                     | ≥ 0,75   |
+| Dice (micro)                    | **0,9841**       | 0,9810                     | ≥ 0,85   |
+| Precision (micro)               | **0,9896**       | 0,9762                     | ≥ 0,85   |
+| Recall (micro)                  | 0,9788           | **0,9858**                 | ≥ 0,85   |
+| IoU, среднее по изображениям    | 0,9336           | **0,9372**                 | —        |
+| Dice, среднее по изображениям   | 0,9545           | **0,9615**                 | —        |
+| Relative Area Error, среднее, % | 5,88             | **4,94**                   | ≤ 10     |
+| Relative Area Error, медиана, % | **0,87**         | 2,14                       | —        |
+
+Обе модели сильно превышают целевые ориентиры. NDWI выигрывает по micro-IoU, precision и
+медианной ошибке площади, U-Net — по recall, среднему IoU/Dice на изображение и средней
+ошибке площади. Причина в источнике разметки: WorldCover получен спектральной
+классификацией, поэтому порог по NDWI близок к оптимуму именно для этих меток, а сеть учится
+на них же и повторяет ту же границу. Практический вывод: индекс дёшев и очень силён, сеть
+даёт более высокий recall, лучшие границы на сложных участках и меньшую среднюю ошибку
+площади; сравнивать их нужно на разметке другого происхождения (например, ручной или
+JRC Global Surface Water), это направление развития.
+
+### По озёрам (U-Net)
+
+| Озеро | Патчей | IoU    | Dice   | Precision | Recall | Relative Area Error, % |
+| ----- | ------ | ------ | ------ | --------- | ------ | ---------------------- |
+| Чаны  | 38     | 0,9666 | 0,9830 | 0,9713    | 0,9951 | 4,94                   |
+| Шира  | 28     | 0,9487 | 0,9737 | 0,9949    | 0,9534 | 4,95                   |
+
+Шира (солоноватое озеро с небольшой долей воды в патчах) даётся тяжелее Чаны: precision почти
+1,0, recall ниже — сеть осторожнее на размытых границах.
+
+### Демо: изменение площади озера Чаны
+
+`python commands.py infer` на паре снимков (окно 1024×1024 px, 10 м, рис.
+`plots/demo_area_change.png`):
+
+| Дата       | Площадь воды         |
+| ---------- | -------------------- |
+| 2023-07-15 | 96,209 км²           |
+| 2024-07-20 | 96,794 км²           |
+| Изменение  | +0,586 км² (+0,61 %) |
+
+### Графики и артефакты эксперимента
+
+- `plots/losses.png` — train/val loss;
+- `plots/metrics.png` — IoU, Dice, Precision, Recall по эпохам;
+- `plots/area_error.png` — Relative Area Error на валидации;
+- `plots/learning_rate.png` — расписание learning rate (warm-up + cosine);
+- `plots/history.csv` — те же числа по эпохам;
+- `plots/val_predictions.png` — image | reference | prediction;
+- `plots/dataset_preview.png` — проверка пар «снимок — маска WorldCover»;
+- MLflow: эксперимент `lake-water-segmentation`, 152 гиперпараметра, 19 метрик, графики и
+  `bundle.json` как артефакты.
+
+### Воспроизведение этого запуска
+
+Запуск выполнялся в Colab из архива репозитория, поэтому в логах `git commit` = `unknown`
+(в архиве нет каталога `.git`). Tracking-сервер в Colab был остановлен во время прогона, и
+обучение прошло с CSV-логгером (`mlflow.allow_fallback=true`); после возврата артефактов
+эксперимент восстановлен в MLflow из `plots/history.csv` — в теге прогона указано
+`imported_from`. При локальном запуске `python commands.py train` всё пишется в MLflow напрямую.
 
 ## Лицензия
 

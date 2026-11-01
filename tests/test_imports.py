@@ -104,3 +104,26 @@ def test_non_mlflow_http_service_is_not_detected_as_tracking_server():
     finally:
         server.shutdown()
         thread.join(timeout=5)
+
+
+def test_stable_seed_is_process_independent():
+    """Sampling seeds must not depend on PYTHONHASHSEED."""
+
+    import subprocess
+    import sys
+
+    code = (
+        "from lake_segmentation.utils import stable_seed;"
+        "print(stable_seed(42, 'chany', '2023-07-15'))"
+    )
+    outputs = {
+        subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            check=True,
+            env={**__import__("os").environ, "PYTHONHASHSEED": hash_seed},
+        ).stdout.strip()
+        for hash_seed in ("0", "1", "12345")
+    }
+    assert len(outputs) == 1, outputs

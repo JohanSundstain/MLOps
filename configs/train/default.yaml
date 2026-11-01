@@ -31,7 +31,9 @@ checkpoint:
   monitor: val/iou
   mode: max
   save_top_k: 1
-  filename: best-{epoch:02d}-{val_iou:.4f}
+  # No metric placeholders here: Lightning looks metrics up by their logged name
+  # ("val/iou"), so a template with "val_iou" silently falls back to 0.
+  filename: best-{epoch:02d}
 
 early_stopping:
   enabled: true

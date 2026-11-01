@@ -59,7 +59,7 @@ from lake_segmentation.data.stac import (
 from lake_segmentation.data.worldcover import read_water_mask
 from lake_segmentation.logging_utils import get_logger
 from lake_segmentation.plots import save_dataset_preview
-from lake_segmentation.utils import get_git_commit, seed_everything
+from lake_segmentation.utils import get_git_commit, seed_everything, stable_seed
 
 LOGGER = get_logger("data.pipeline")
 
@@ -212,7 +212,7 @@ def build_patch_records(
             )
             candidates = list(iter_candidates(water, stack.valid, patch_size, stride))
             generator = np.random.default_rng(
-                abs(hash((int(cfg.seed), aoi.name, reference.target_date))) % (2**32)
+                stable_seed(int(cfg.seed), aoi.name, reference.target_date)
             )
             selected = select_candidates(
                 candidates=candidates,

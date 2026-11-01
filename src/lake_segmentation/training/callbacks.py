@@ -57,6 +57,9 @@ class HistoryCallback(Callback):
         self.written: dict[str, Path] = {}
 
     def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        # The sanity-check pass reports bogus metrics for epoch 0; it must not be recorded.
+        if trainer.sanity_checking:
+            return
         metrics = trainer.callback_metrics
         epoch = int(trainer.current_epoch)
         values: dict[str, float | None] = {}

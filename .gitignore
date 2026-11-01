@@ -85,9 +85,7 @@ outputs/
 logs/
 lightning_logs/
 predictions/
-reports/
 triton_repo/
-plots/*.log
 !plots/.gitkeep
 
 # ---- Tooling caches --------------------------------------------------------
@@ -105,3 +103,6 @@ dvc-storage/
 .pre-commit-cache/
 .npm-cache/
 .hf-cache/
+
+# macOS
+.DS_Store

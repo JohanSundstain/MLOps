@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import random
 import subprocess
@@ -30,6 +31,17 @@ def seed_everything(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
+
+
+def stable_seed(*parts: object) -> int:
+    """Deterministic 64-bit seed from arbitrary values.
+
+    Python's built-in ``hash()`` is salted per process for strings, so it must never be used
+    where reproducibility matters (for example when seeding the per-scene patch sampling).
+    """
+
+    digest = hashlib.sha256("|".join(str(part) for part in parts).encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big")
 
 
 def get_git_commit(short: bool = False) -> str:

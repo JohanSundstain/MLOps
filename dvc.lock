@@ -45,9 +45,9 @@ stages:
       size: 26659
     - path: src/lake_segmentation/data
       hash: md5
-      md5: 933c79c8f15aef0f3138e4610c3168f3.dir
-      size: 172884
-      nfiles: 23
+      md5: 816932d544d6f88f1d2978b2c9777bef.dir
+      size: 178409
+      nfiles: 24
     - path: src/lake_segmentation/tiling.py
       hash: md5
       md5: 751d4b8d8bce9822746fa98ac1cf2aff
@@ -73,6 +73,52 @@ stages:
     outs:
     - path: data/processed
       hash: md5
-      md5: 0c676f7341dcb251962c5b3e47ce36ad.dir
-      size: 147680689
+      md5: 7c069fe24a5e8a1cdec2c2cd124f7779.dir
+      size: 147503367
       nfiles: 444
+  train:
+    cmd: python commands.py train
+    deps:
+    - path: configs/config.yaml
+      hash: md5
+      md5: 9c7087479fea82fceb93bde9b91be43c
+      size: 1157
+    - path: configs/export/onnx.yaml
+      hash: md5
+      md5: 1d365ebf2662f943c131857d083f26b0
+      size: 286
+    - path: configs/mlflow/default.yaml
+      hash: md5
+      md5: ccf1f41c46e8cd6bb21493257d1017fd
+      size: 403
+    - path: configs/model/unet_resnet34.yaml
+      hash: md5
+      md5: 20c1601eac048770bc24364416b963bb
+      size: 357
+    - path: configs/train/default.yaml
+      hash: md5
+      md5: c16bb5be55fc4068d78ef253ef384ad7
+      size: 1084
+    - path: data/processed
+      hash: md5
+      md5: 7c069fe24a5e8a1cdec2c2cd124f7779.dir
+      size: 147503367
+      nfiles: 444
+    - path: src/lake_segmentation
+      hash: md5
+      md5: 28ae152d60383abf8c870db71638cc05.dir
+      size: 548695
+      nfiles: 96
+    params:
+      configs/train/default.yaml:
+        batch_size: 8
+        learning_rate: 0.0003
+        max_epochs: 30
+        threshold: 0.5
+        weight_decay: 0.0001
+    outs:
+    - path: weights
+      hash: md5
+      md5: 6c145973050931a81860c964dcbf6f07.dir
+      size: 195705569
+      nfiles: 4

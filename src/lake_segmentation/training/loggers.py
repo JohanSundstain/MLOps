@@ -161,7 +161,9 @@ def log_run_metadata(logger: Any, cfg: DictConfig) -> None:
     try:
         from omegaconf import OmegaConf
 
-        config_dump = Path(logger.save_dir if hasattr(logger, "save_dir") else ".") / "config.yaml"
+        # MLflowLogger has ``save_dir=None``, CSVLogger has a real directory.
+        base_dir = getattr(logger, "save_dir", None) or "."
+        config_dump = Path(base_dir) / "config.yaml"
         config_dump.parent.mkdir(parents=True, exist_ok=True)
         OmegaConf.save(cfg, config_dump, resolve=True)
         if isinstance(logger, MLflowLogger):
