@@ -36,6 +36,7 @@ from lake_segmentation.constants import (
     NORM_STATS_FILENAME,
     PATCH_DIRNAME,
     SCL_INVALID_CLASSES,
+    SPLIT_NAMES,
 )
 from lake_segmentation.data.gdal_env import configure_gdal
 from lake_segmentation.data.normalization import compute_stats, save_stats
@@ -298,16 +299,20 @@ def build_patch_records(
     return frame
 
 
-def _split_statistics(frame: pd.DataFrame, splits: dict[str, str]) -> dict[str, Any]:
+def _split_statistics(frame: pd.DataFrame) -> dict[str, Any]:
+    """Per-split patch counts and lakes (``train`` / ``val`` / ``test`` only)."""
+
     statistics: dict[str, Any] = {}
-    for split in ("train", "val", "test"):
+    for split in SPLIT_NAMES:
         subset = frame[frame["split"] == split]
         statistics[split] = {
             "patches": int(len(subset)),
             "lakes": sorted(subset["group"].unique().tolist()) if len(subset) else [],
             "positive_patches": int((subset["water_fraction"] > 0).sum()) if len(subset) else 0,
+            "water_fraction_mean": (
+                round(float(subset["water_fraction"].mean()), 6) if len(subset) else 0.0
+            ),
         }
-    statistics["groups"] = splits
     return statistics
 
 
@@ -394,7 +399,8 @@ def run_preprocess(cfg: DictConfig) -> dict[str, Any]:
         "num_patches": int(len(frame)),
         "patch_size": int(cfg.data.patch.size),
         "band_order": band_order,
-        "splits": _split_statistics(frame, splits),
+        "splits": _split_statistics(frame),
+        "split_assignment": dict(sorted(splits.items())),
         "patches_per_aoi": frame.groupby("aoi").size().to_dict(),
         "normalization": stats.to_dict(),
         "scenes": per_scene_stats,
