@@ -75,3 +75,32 @@ def test_streaming_metrics_match_numpy_definitions():
     )
     for name in ("iou", "dice", "precision", "recall"):
         assert float(computed[f"test/{name}"]) == pytest.approx(reference[name], rel=1e-6)
+
+
+def test_non_mlflow_http_service_is_not_detected_as_tracking_server():
+    """A Jupyter-like server answering HTML on /health must not be treated as MLflow."""
+
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    from lake_segmentation.training.loggers import is_server_available
+
+    class HtmlHandler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802 - stdlib naming
+            self.send_response(404)
+            self.send_header("Content-Type", "text/html")
+            self.end_headers()
+            self.wfile.write(b"<html><body>404 Not Found</body></html>")
+
+        def log_message(self, *args) -> None:  # keep the test output clean
+            return
+
+    server = HTTPServer(("127.0.0.1", 0), HtmlHandler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        assert is_server_available(f"http://127.0.0.1:{port}", timeout=2) is False
+    finally:
+        server.shutdown()
+        thread.join(timeout=5)

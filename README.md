@@ -247,7 +247,9 @@ python commands.py --help
 ```
 
 Поднять MLflow (нужен для логирования обучения; адрес по умолчанию
-`http://127.0.0.1:8080`):
+`http://127.0.0.1:8080`). В Google Colab порт 8080 занят Jupyter-сервером, поэтому ноутбук
+поднимает MLflow на 5000 и переопределяет `mlflow.tracking_uri`; локально команда ниже
+соответствует адресу из задания:
 
 ```bash
 mlflow server --host 127.0.0.1 --port 8080 \
@@ -540,7 +542,9 @@ dvc push                      # отправить данные и веса в �
   и полный конфиг как артефакт;
 - графики и логи складываются в `plots/` (`losses.png`, `metrics.png`, `area_error.png`,
   `learning_rate.png`, `history.csv`, `train.log`, `val_predictions.png`) и загружаются в MLflow;
-- если tracking-сервер недоступен, включается `CSVLogger` (`mlflow.allow_fallback=true`).
+- доступность сервера проверяется по ответу `/health` (а не по открытому порту) и одним
+  реальным API-вызовом: если на порту отвечает не MLflow, обучение не падает, а пишет
+  предупреждение и переключается на `CSVLogger` (`mlflow.allow_fallback=true`).
 
 ## Результаты
 
