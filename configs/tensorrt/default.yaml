@@ -1,0 +1,10 @@
+# TensorRT engine build. Requires an NVIDIA GPU and the `trtexec` tool
+# (NVIDIA/TensorRT container or a local TensorRT installation).
+onnx_model: weights/lake_unet.onnx
+engine: weights/lake_unet.engine
+trtexec: trtexec
+fp16: true
+int8: false
+workspace_gb: 4
+shapes: "image:1x4x256x256"
+extra_args: ""

@@ -1,0 +1,91 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lake-segmentation"
+version = "0.1.0"
+description = "Water segmentation of lakes on Sentinel-2 imagery and lake area change analysis"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "MIT" }
+authors = [
+  { name = "Matvey Kopylov" },
+  { name = "Andrey Tishkin" },
+  { name = "Alexey Bakumov" },
+]
+keywords = ["remote-sensing", "sentinel-2", "semantic-segmentation", "pytorch-lightning"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Image Processing",
+]
+dependencies = [
+  # deep learning
+  "torch>=2.2",
+  "torchvision>=0.17",
+  "lightning>=2.2",
+  "torchmetrics>=1.3",
+  "segmentation-models-pytorch>=0.3.4",
+  # configuration / cli
+  "hydra-core>=1.3",
+  "fire>=0.6",
+  # experiment tracking
+  "mlflow>=2.10,<3.0",
+  # mlflow 2.x is not compatible with SQLAlchemy 2.1 (FallbackAsyncAdaptedQueuePool)
+  "sqlalchemy>=2.0,<2.1",
+  # data management and remote sensing
+  "dvc>=3.40",
+  "rasterio>=1.3.9",
+  "pystac-client>=0.7",
+  "pyproj>=3.6",
+  "numpy>=1.26",
+  "pandas>=2.1",
+  # plotting and progress
+  "matplotlib>=3.8",
+  "tqdm>=4.66",
+  # model export / serving
+  "onnx>=1.15",
+  "onnxruntime>=1.17",
+]
+
+[project.optional-dependencies]
+# TensorRT is not distributed as a regular wheel for every platform: it is installed
+# separately (see README, "Production preparation"). The extra only documents the intent.
+tensorrt = []
+
+[dependency-groups]
+dev = [
+  "pre-commit>=3.7",
+  "black>=24.4",
+  "isort>=5.13",
+  "flake8>=7.0",
+  "pytest>=8.2",
+]
+
+[project.scripts]
+lake-segmentation = "lake_segmentation.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lake_segmentation"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/lake_segmentation", "configs", "README.md", "commands.py"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+extend-exclude = "(\\.venv|notebooks/.*\\.ipynb)"
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["lake_segmentation"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.uv]
+default-groups = ["dev"]

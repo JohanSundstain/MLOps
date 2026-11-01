@@ -1,0 +1,8 @@
+# MLflow model serving (alternative to the Triton server).
+host: 127.0.0.1
+port: 5001
+onnx_model: weights/lake_unet.onnx
+bundle: weights/bundle.json
+registered_model_name: lake-unet
+# mlflow models serve is started with this URI when the CLI is used.
+model_uri_file: weights/mlflow_model_uri.txt

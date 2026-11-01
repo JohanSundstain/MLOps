@@ -1,0 +1,10 @@
+# The MLflow tracking server is expected to be running on this address
+# (`mlflow server --host 127.0.0.1 --port 8080`).
+tracking_uri: http://127.0.0.1:8080
+experiment_name: lake-water-segmentation
+run_name: unet-resnet34
+# Log the ONNX model and the figures as MLflow artefacts.
+log_artifacts: true
+log_model: false
+# Fall back to CSV logs when the tracking server is unreachable.
+allow_fallback: true

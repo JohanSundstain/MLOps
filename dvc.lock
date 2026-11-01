@@ -1,0 +1,78 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python commands.py download
+    deps:
+    - path: configs/config.yaml
+      hash: md5
+      md5: 79528c7762af055972431d4076bb36e1
+      size: 1137
+    - path: configs/data/default.yaml
+      hash: md5
+      md5: f886f465dbb7f18e9348cf3e413c0928
+      size: 3667
+    - path: src/lake_segmentation/data/pipeline.py
+      hash: md5
+      md5: efd1e6af3677129503c2547455ad985d
+      size: 17840
+    - path: src/lake_segmentation/data/stac.py
+      hash: md5
+      md5: 8cc82c166e8c2fedcaadcb385731836e
+      size: 9455
+    outs:
+    - path: data/raw/scenes_manifest.json
+      hash: md5
+      md5: b62516a7e287d447de17885612123b87
+      size: 26659
+  preprocess:
+    cmd: python commands.py preprocess
+    deps:
+    - path: configs/config.yaml
+      hash: md5
+      md5: 79528c7762af055972431d4076bb36e1
+      size: 1137
+    - path: configs/data/default.yaml
+      hash: md5
+      md5: f886f465dbb7f18e9348cf3e413c0928
+      size: 3667
+    - path: configs/preprocess/default.yaml
+      hash: md5
+      md5: 8e64117ad7d30a9989b3ed8208c08510
+      size: 386
+    - path: data/raw/scenes_manifest.json
+      hash: md5
+      md5: b62516a7e287d447de17885612123b87
+      size: 26659
+    - path: src/lake_segmentation/data
+      hash: md5
+      md5: 933c79c8f15aef0f3138e4610c3168f3.dir
+      size: 172884
+      nfiles: 23
+    - path: src/lake_segmentation/tiling.py
+      hash: md5
+      md5: 751d4b8d8bce9822746fa98ac1cf2aff
+      size: 4607
+    params:
+      configs/data/default.yaml:
+        patch.max_patches_per_scene: 18
+        patch.max_water_fraction: 0.98
+        patch.min_valid_fraction: 0.95
+        patch.min_water_fraction: 0.02
+        patch.negative_ratio: 0.3
+        patch.size: 256
+        patch.stride: 256
+      configs/preprocess/default.yaml:
+        clip_max: 0.4
+        clip_min: 0.0
+        reflectance_scale: 10000.0
+        split:
+          train: 0.7
+          val: 0.15
+          test: 0.15
+          seed: 42
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 0c676f7341dcb251962c5b3e47ce36ad.dir
+      size: 147680689
+      nfiles: 444

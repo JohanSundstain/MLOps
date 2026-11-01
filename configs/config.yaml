@@ -1,0 +1,43 @@
+# Root configuration of the project.
+#
+# Every command composes this file with Hydra and any value can be overridden from the
+# command line, e.g.:
+#
+#   python commands.py train --overrides="train.max_epochs=5,train.batch_size=4"
+#
+# The config is hierarchical: one file per stage (data, preprocess, model, train, infer,
+# export, tensorrt, serving, mlflow, baseline).
+defaults:
+  - data: default
+  - preprocess: default
+  - model: unet_resnet34
+  - train: default
+  - infer: default
+  - export: onnx
+  - tensorrt: default
+  - serving: mlflow
+  - mlflow: default
+  - baseline: ndwi
+  - _self_
+
+project_name: sentinel2-lake-segmentation
+
+# The seed is propagated to NumPy, PyTorch, the data split and the augmentation generators.
+seed: 42
+
+paths:
+  # Relative paths are resolved against the repository root, never against the CWD.
+  data_raw: data/raw
+  data_processed: data/processed
+  weights: weights
+  plots: plots
+  predictions: predictions
+  logs: logs
+
+hydra:
+  job:
+    # Never change the working directory: config paths are resolved from the repository root.
+    chdir: false
+  run:
+    dir: outputs/hydra
+  output_subdir: null

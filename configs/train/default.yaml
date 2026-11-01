@@ -1,0 +1,45 @@
+# Training hyper-parameters.
+max_epochs: 30
+batch_size: 8
+num_workers: 4
+learning_rate: 0.0003
+encoder_learning_rate_scale: 0.5
+weight_decay: 0.0001
+gradient_clip_val: 1.0
+# Probability threshold applied to the sigmoid output; tuned on validation after training.
+threshold: 0.5
+
+scheduler:
+  name: cosine
+  warmup_epochs: 2
+  min_learning_rate: 0.000001
+
+loss:
+  bce_weight: 0.5
+  dice_weight: 0.5
+
+augment: true
+
+accelerator: auto
+devices: auto
+precision: 32-true
+log_every_n_steps: 5
+limit_train_batches: 1.0
+limit_val_batches: 1.0
+
+checkpoint:
+  monitor: val/iou
+  mode: max
+  save_top_k: 1
+  filename: best-{epoch:02d}-{val_iou:.4f}
+
+early_stopping:
+  enabled: true
+  monitor: val/iou
+  mode: max
+  patience: 10
+
+# Rebuild the dataset automatically when data/processed is missing and DVC cannot provide it.
+auto_preprocess: true
+# Export ONNX right after training (the same command is available separately).
+export_onnx_after_training: true

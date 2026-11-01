@@ -1,0 +1,14 @@
+# Preprocessing: reflectance conversion, patch selection and the group-wise split.
+reflectance_scale: 10000.0
+# Physically plausible reflectance range used for clipping before normalisation.
+clip_min: 0.0
+clip_max: 0.4
+
+split:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+  seed: 42
+
+# Visual validation of a few "image - mask" pairs (written to plots/dataset_preview.png).
+preview_samples: 4

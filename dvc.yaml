@@ -1,0 +1,61 @@
+# DVC pipeline: every stage is reproducible with `dvc repro`.
+# Data and model artefacts live in the DVC cache / remote, never in git.
+stages:
+  download:
+    desc: Resolve the best Sentinel-2 scene for every AOI and date through STAC.
+    cmd: python commands.py download
+    deps:
+      - configs/config.yaml
+      - configs/data/default.yaml
+      - src/lake_segmentation/data/stac.py
+      - src/lake_segmentation/data/pipeline.py
+    outs:
+      - data/raw/scenes_manifest.json
+
+  preprocess:
+    desc: Build 256x256 patches, the group-wise split and the normalisation statistics.
+    cmd: python commands.py preprocess
+    deps:
+      - data/raw/scenes_manifest.json
+      - configs/config.yaml
+      - configs/data/default.yaml
+      - configs/preprocess/default.yaml
+      - src/lake_segmentation/data
+      - src/lake_segmentation/tiling.py
+    params:
+      - configs/data/default.yaml:
+          - patch.size
+          - patch.stride
+          - patch.min_water_fraction
+          - patch.max_water_fraction
+          - patch.negative_ratio
+          - patch.min_valid_fraction
+          - patch.max_patches_per_scene
+      - configs/preprocess/default.yaml:
+          - split
+          - reflectance_scale
+          - clip_min
+          - clip_max
+    outs:
+      - data/processed
+
+  train:
+    desc: Train U-Net ResNet34 and write the model artefacts and figures.
+    cmd: python commands.py train
+    deps:
+      - data/processed
+      - configs/config.yaml
+      - configs/model/unet_resnet34.yaml
+      - configs/train/default.yaml
+      - configs/mlflow/default.yaml
+      - configs/export/onnx.yaml
+      - src/lake_segmentation
+    params:
+      - configs/train/default.yaml:
+          - max_epochs
+          - batch_size
+          - learning_rate
+          - weight_decay
+          - threshold
+    outs:
+      - weights

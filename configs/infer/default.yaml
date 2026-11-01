@@ -1,0 +1,28 @@
+# Inference on a pair of georeferenced Sentinel-2 GeoTIFFs.
+# onnx | torch
+backend: onnx
+threshold: 0.5
+tile_size: 256
+tile_overlap: 0
+batch_size: 8
+padding_mode: reflect
+device: auto
+
+# Model artefacts produced by training / export.
+bundle: weights/bundle.json
+checkpoint: weights/lake_unet.ckpt
+onnx_model: weights/lake_unet.onnx
+
+# Assumed band order of the input GeoTIFFs (B2, B3, B4, B8).
+band_order: [blue, green, red, nir]
+reflectance_scale: 10000.0
+clip_min: 0.0
+clip_max: 0.4
+
+output_dir: predictions
+save_masks: true
+save_probabilities: false
+save_report: true
+save_figure: true
+# Area of interest as [min_lon, min_lat, max_lon, max_lat]; empty means "whole raster".
+roi: []

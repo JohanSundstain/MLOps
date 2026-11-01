@@ -1,0 +1,5 @@
+# Files tracked by DVC that git-adjacent tools should ignore.
+.git
+.venv
+.uv-cache
+.uv-python

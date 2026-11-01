@@ -1,0 +1,5 @@
+# NDWI threshold baseline: NDWI = (green - NIR) / (green + NIR).
+threshold_min: 0.0
+threshold_max: 0.6
+threshold_steps: 25
+output: reports/ndwi_baseline.json
