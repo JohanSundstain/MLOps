@@ -552,6 +552,13 @@ dvc push                      # отправить данные и веса в �
 (`train.auto_preprocess=true`) — то есть загрузка данных из открытых источников встроена в
 пайплайн и не требует доступа к приватному storage.
 
+Полная загрузка данных из открытых источников вынесена в функцию `download_data()`
+(`src/lake_segmentation/data/pipeline.py`) и доступна как отдельная команда:
+
+```bash
+python commands.py download-data        # Sentinel-2 (STAC) + WorldCover -> датасет фрагментов
+```
+
 ## Logging
 
 - логирование в [MLflow](https://mlflow.org/) по адресу из `configs/mlflow/default.yaml`

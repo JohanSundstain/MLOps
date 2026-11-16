@@ -20,13 +20,6 @@ from lake_segmentation.data.patches import load_patch
 def augment_image_and_mask(
     image: np.ndarray, mask: np.ndarray, generator: np.random.Generator
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Random flips and 90° rotations.
-
-    Only geometric transformations are used: any photometric augmentation would distort the
-    physical meaning of the spectral bands, which is exactly what the project description
-    asks to avoid.
-    """
-
     if generator.random() < 0.5:
         image = image[:, :, ::-1]
         mask = mask[:, ::-1]
@@ -41,8 +34,6 @@ def augment_image_and_mask(
 
 
 class LakePatchDataset(Dataset):
-    """Returns normalised images and float masks ready for ``BCEWithLogitsLoss``."""
-
     def __init__(
         self,
         records: Sequence[Mapping[str, Any]],

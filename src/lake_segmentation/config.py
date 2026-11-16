@@ -21,12 +21,6 @@ CONFIG_DIR_ENV_VAR = "LAKE_SEGMENTATION_CONFIGS"
 
 
 def find_project_root(start: Path | None = None) -> Path:
-    """Return the repository root.
-
-    The lookup order is: ``LAKE_SEGMENTATION_ROOT``, then the parents of ``start``
-    (the current working directory by default), then the parents of this file.
-    """
-
     env_root = os.environ.get(PROJECT_ROOT_ENV_VAR)
     if env_root:
         return Path(env_root).expanduser().resolve()
@@ -45,8 +39,6 @@ def find_project_root(start: Path | None = None) -> Path:
 
 
 def find_config_dir(config_dir: str | Path | None = None) -> Path:
-    """Return the directory with the Hydra configs."""
-
     if config_dir is not None:
         path = Path(config_dir).expanduser().resolve()
     elif os.environ.get(CONFIG_DIR_ENV_VAR):
@@ -59,8 +51,6 @@ def find_config_dir(config_dir: str | Path | None = None) -> Path:
 
 
 def parse_overrides(overrides: str | Sequence[str] | None) -> list[str]:
-    """Turn ``"train.max_epochs=3,train.batch_size=2"`` into a list of Hydra overrides."""
-
     if overrides is None:
         return []
     if isinstance(overrides, str):
@@ -80,8 +70,6 @@ def load_config(
     overrides: str | Sequence[str] | None = None,
     config_dir: str | Path | None = None,
 ) -> DictConfig:
-    """Compose the Hydra config tree and return it as a ``DictConfig``."""
-
     resolved_config_dir = find_config_dir(config_dir)
     hydra_overrides = parse_overrides(overrides)
     with initialize_config_dir(config_dir=str(resolved_config_dir), version_base=None):
@@ -109,8 +97,6 @@ def resolve_path(path_value: str | Path, root: Path | None = None) -> Path:
 
 
 def resolve_paths(cfg: DictConfig) -> dict[str, Path]:
-    """Resolve every entry of ``cfg.paths`` and create the writable directories."""
-
     root = find_project_root()
     resolved: dict[str, Path] = {}
     for key, value in cfg.paths.items():

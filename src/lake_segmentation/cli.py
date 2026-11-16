@@ -62,6 +62,19 @@ class LakeSegmentationCli:
 
         _print_summary("preprocess", run_preprocess(cfg))
 
+    def download_data(
+        self,
+        config_name: str = "config",
+        overrides: str = "",
+        config_dir: str | None = None,
+    ) -> None:
+        """Download the data from open sources (Sentinel-2 / WorldCover) and build the dataset."""
+
+        cfg = load_config(config_name, overrides, config_dir)
+        from lake_segmentation.data.pipeline import download_data as run_download_data
+
+        _print_summary("download-data", run_download_data(cfg))
+
     def make_example(
         self,
         aoi: str = "chany",

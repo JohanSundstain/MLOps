@@ -69,7 +69,7 @@ def _process(
         )
     water_pixels = int(mask.sum())
     LOGGER.info(
-        "%s: %d water pixels, %.4f km² (%.1f%% of the raster)",
+        "%s: %d water pixels, %.4f km^2 (%.1f%% of the raster)",
         stem,
         water_pixels,
         area_m2 / 1e6,
@@ -196,7 +196,7 @@ def run_inference(
             f"({relative_text})"
         )
         LOGGER.info(
-            "Area change: %.3f -> %.3f km² (%s)",
+            "Area change: %.3f -> %.3f km^2 (%s)",
             change["area_first_km2"],
             change["area_second_km2"],
             relative_text,

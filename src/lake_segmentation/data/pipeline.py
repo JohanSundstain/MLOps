@@ -437,6 +437,25 @@ def run_preprocess(cfg: DictConfig) -> dict[str, Any]:
     return summary
 
 
+def download_data(cfg: DictConfig) -> dict[str, Any]:
+    """Download the project data from open sources (Sentinel-2 / WorldCover).
+
+    Required by the local DVC storage setup: this function rebuilds the dataset without
+    the private remote by resolving the Sentinel-2 scenes through STAC (Copernicus) and
+    building the patch dataset with masks from the public WorldCover product. It combines
+    the ``download`` and ``preprocess`` stages and can be used directly as a fallback for
+    ``dvc pull``.
+    """
+
+    download_summary = run_download(cfg)
+    preprocess_summary = run_preprocess(cfg)
+    return {
+        "source": "open",
+        "download": download_summary,
+        "preprocess": preprocess_summary,
+    }
+
+
 def remove_stale_patches(processed_dir: Path, frame: pd.DataFrame) -> int:
     """Delete ``*.npz`` files that are no longer referenced by the manifest."""
 
